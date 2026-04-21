@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ship Stability Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="hero-topbar">
+            <p class="eyebrow" data-i18n="heroEyebrow">Interactive learning tool</p>
+            <label class="language-picker">
+              <span data-i18n="languageLabel">Language</span>
+              <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="is">Islenska</option>
+              </select>
+            </label>
+          </div>
+          <h1 data-i18n="heroTitle">Ship Stability Lab</h1>
+          <p class="hero-text">
+            <span data-i18n="heroText">Explore how loading, unloading, and shifting weight changes a ship's
+            center of gravity, list, and initial stability.
+            </span>
+          </p>
+        </div>
+        <div class="hero-card">
+          <p class="card-label" data-i18n="heroCardLabel">What this app teaches</p>
+          <ul class="hero-list">
+            <li data-i18n="heroList1">How GM changes when weight moves vertically</li>
+            <li data-i18n="heroList2">How transverse transfers create heeling moments</li>
+            <li data-i18n="heroList3">How to test your own vessel data in a safe sandbox</li>
+          </ul>
+          <p class="hero-note" data-i18n="heroNote">
+            Educational model using initial stability assumptions and small-angle
+            approximations.
+          </p>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="shipDataTitle">1. Ship data</h2>
+            <button id="loadExample" class="ghost-button" data-i18n="loadExample">Load example ship</button>
+          </div>
+          <div class="profile-tools">
+            <label class="profile-name-field">
+              <span data-i18n="profileNameLabel">Profile name</span>
+              <input id="profileName" type="text" placeholder="My training ship" data-i18n-placeholder="profileNamePlaceholder" />
+            </label>
+            <label class="profile-picker">
+              <span data-i18n="savedProfilesLabel">Saved profiles</span>
+              <select id="profileSelect">
+                <option value="">No saved profiles</option>
+              </select>
+            </label>
+            <div class="profile-actions">
+              <button id="saveProfile" class="ghost-button" data-i18n="saveProfile">Save profile</button>
+              <button id="loadProfile" class="ghost-button" data-i18n="loadProfile">Load profile</button>
+              <button id="deleteProfile" class="ghost-button" data-i18n="deleteProfile">Delete profile</button>
+            </div>
+            <p id="profileMessage" class="muted profile-message" data-i18n="profileMessageDefault">
+              Save a ship profile with its cargo holds so you can reload it later.
+            </p>
+          </div>
+          <div class="form-grid">
+            <label>
+              <span data-i18n="shipNameLabel">Ship name</span>
+              <input id="shipName" type="text" value="Training Vessel" />
+            </label>
+            <label>
+              <span data-i18n="displacementLabel">Displacement</span>
+              <div class="input-with-unit">
+                <input id="displacement" type="number" min="1" step="0.1" value="8200" />
+                <span>t</span>
+              </div>
+            </label>
+            <label>
+              <span data-i18n="beamLabel">Beam</span>
+              <div class="input-with-unit">
+                <input id="beam" type="number" min="1" step="0.1" value="22" />
+                <span>m</span>
+              </div>
+            </label>
+            <label>
+              <span data-i18n="draftLabel">Draft</span>
+              <div class="input-with-unit">
+                <input id="draft" type="number" min="0.1" step="0.1" value="7.2" />
+                <span>m</span>
+              </div>
+            </label>
+            <label>
+              KM
+              <div class="input-with-unit">
+                <input id="km" type="number" step="0.01" value="8.7" />
+                <span>m</span>
+              </div>
+            </label>
+            <label>
+              KG
+              <div class="input-with-unit">
+                <input id="kg" type="number" step="0.01" value="7.6" />
+                <span>m</span>
+              </div>
+            </label>
+            <label>
+              TCG
+              <div class="input-with-unit">
+                <input id="tcg" type="number" step="0.01" value="0" />
+                <span>m</span>
+              </div>
+            </label>
+            <label>
+              XG
+              <div class="input-with-unit">
+                <input id="xg" type="number" step="0.01" value="42" />
+                <span>m</span>
+              </div>
+            </label>
+            <label>
+              <span data-i18n="minGmLabel">Allowable minimum GM</span>
+              <div class="input-with-unit">
+                <input id="minGm" type="number" min="0" step="0.01" value="0.5" />
+                <span>m</span>
+              </div>
+            </label>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="cargoManifestTitle">2. Cargo manifest</h2>
+            <button id="addCargoRow" class="ghost-button" data-i18n="addCargoRow">Add cargo row</button>
+          </div>
+          <p class="muted manifest-copy" data-i18n="manifestCopy">
+            Add multiple cargo items to build up a realistic condition for your own ship.
+          </p>
+          <div class="manifest-head" aria-hidden="true">
+            <span data-i18n="cargoHeader">Cargo</span>
+            <span data-i18n="cargoWeightHeader">`t` tonnes</span>
+            <span data-i18n="cargoKgHeader">`Kg` meters from keel</span>
+            <span data-i18n="cargoXgHeader">`⊗g` meters from centre of gravity</span>
+            <span></span>
+          </div>
+          <div id="cargoList" class="cargo-list"></div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="weightActionTitle">3. Weight action</h2>
+            <button id="resetScenario" class="ghost-button" data-i18n="resetChanges">Reset changes</button>
+          </div>
+          <div class="stack">
+            <div class="segmented" id="actionMode">
+              <button data-mode="load" class="active" data-i18n="modeLoad">Load or remove</button>
+              <button data-mode="transfer" data-i18n="modeTransfer">Transfer weight</button>
+            </div>
+            <div class="form-grid" id="weightForm">
+              <label>
+                <span data-i18n="weightLabel">Weight</span>
+                <div class="input-with-unit">
+                  <input id="weightAmount" type="number" min="0" step="0.1" value="150" />
+                  <span>t</span>
+                </div>
+              </label>
+              <label data-group="load">
+                <span data-i18n="actionLabel">Action</span>
+                <select id="loadType">
+                  <option value="add" data-i18n="addWeightOption">Add weight</option>
+                  <option value="remove" data-i18n="removeWeightOption">Remove weight</option>
+                </select>
+              </label>
+              <label>
+                Initial KG
+                <div class="input-with-unit">
+                  <input id="kgFrom" type="number" step="0.01" value="7.6" />
+                  <span>m</span>
+                </div>
+              </label>
+              <label>
+                Final KG
+                <div class="input-with-unit">
+                  <input id="kgTo" type="number" step="0.01" value="11.4" />
+                  <span>m</span>
+                </div>
+              </label>
+              <label>
+                Initial TCG
+                <div class="input-with-unit">
+                  <input id="tcgFrom" type="number" step="0.01" value="0" />
+                  <span>m</span>
+                </div>
+              </label>
+              <label>
+                Final TCG
+                <div class="input-with-unit">
+                  <input id="tcgTo" type="number" step="0.01" value="4" />
+                  <span>m</span>
+                </div>
+              </label>
+            </div>
+            <div class="action-row">
+              <button id="applyAction" class="primary-button" data-i18n="applyAction">Apply action</button>
+              <p id="actionSummary" class="muted" data-i18n="actionSummaryDefault">
+                Add, remove, or shift weight and see the ship react instantly.
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid results-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="stabilitySnapshotTitle">4. Stability snapshot</h2>
+            <p id="statusBadge" class="status neutral">Monitoring</p>
+          </div>
+          <div class="metrics">
+            <div class="metric">
+              <span class="metric-label">GM</span>
+              <strong id="gmValue">0.00 m</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label" data-i18n="listMetricLabel">List</span>
+              <strong id="listValue">0.0 deg</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Vertical CG</span>
+              <strong id="kgValue">0.00 m</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Transverse CG</span>
+              <strong id="tcgValue">0.00 m</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Longitudinal CG</span>
+              <strong id="xgValue">0.00 m</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Displacement</span>
+              <strong id="dispValue">0.0 t</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Approx. GZ at 10 deg</span>
+              <strong id="gzValue">0.00 m</strong>
+            </div>
+          </div>
+          <div class="explanation">
+            <p id="statusText"></p>
+            <p id="formulaText" class="muted"></p>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="visualLearningTitle">5. Visual learning view</h2>
+            <p class="muted" data-i18n="visualLearningNote">Not to scale, but directionally useful.</p>
+          </div>
+          <div class="visual-wrap">
+            <canvas id="shipCanvas" width="760" height="430" aria-label="Ship stability diagram"></canvas>
+          </div>
+          <div class="legend">
+            <span><i class="swatch hull"></i>Hull</span>
+            <span><i class="swatch center"></i>Centerline</span>
+            <span><i class="swatch meta"></i>Metacenter</span>
+            <span><i class="swatch gravity"></i>Center of gravity</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="listIndicatorTitle">6. Listing indicator</h2>
+            <p class="muted" data-i18n="listIndicatorNote">Dedicated view of list angle and direction.</p>
+          </div>
+          <div class="chart-wrap heel-wrap">
+            <canvas id="listCanvas" width="760" height="260" aria-label="List angle indicator"></canvas>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="trimIndicatorTitle">7. Trim indicator</h2>
+            <p class="muted" data-i18n="trimIndicatorNote">Shows simplified trim aft and trim forward response.</p>
+          </div>
+          <div class="chart-wrap heel-wrap">
+            <canvas id="trimCanvas" width="760" height="260" aria-label="Trim indicator"></canvas>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="stabilityCurveTitle">8. Stability curve</h2>
+            <p class="muted" data-i18n="stabilityCurveNote">Small-angle teaching approximation: GZ = GM x sin(theta)</p>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="curveCanvas" width="760" height="300" aria-label="Approximate GZ curve"></canvas>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="actionLogTitle">9. Action log</h2>
+            <button id="clearLog" class="ghost-button" data-i18n="clearLog">Clear log</button>
+          </div>
+          <ol id="historyList" class="history-list"></ol>
+        </article>
+      </section>
+
+      <section class="panel notes">
+        <div class="panel-head">
+          <h2 data-i18n="teachingTitle">How to use it for teaching</h2>
+        </div>
+        <div class="notes-grid">
+          <div>
+            <h3 data-i18n="teaching1Title">Start with baseline stability</h3>
+            <p data-i18n="teaching1Body">
+              Set displacement, KM, and KG for the vessel. The app calculates
+              initial GM and indicates whether the baseline condition is
+              comfortable, marginal, or unstable.
+            </p>
+          </div>
+          <div>
+            <h3 data-i18n="teaching2Title">Demonstrate weight transfer</h3>
+            <p data-i18n="teaching2Body">
+              Move weight upward to show how KG rises and GM falls. Move weight
+              sideways to show the heeling moment and list angle.
+            </p>
+          </div>
+          <div>
+            <h3 data-i18n="teaching3Title">Try your own ship</h3>
+            <p data-i18n="teaching3Body">
+              Enter your ship data and test deck cargo, ballast shifts, or
+              off-center loading. Use the results as a learning aid, not as a
+              replacement for approved stability documentation.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
